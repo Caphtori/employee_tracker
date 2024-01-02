@@ -10,4 +10,3 @@ const db = mysql.createConnection(
     },
     console.log(`Successfully connected to the employees_db database.`)
 )
-
