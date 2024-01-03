@@ -1,12 +1,7 @@
 require('dotenv').config();
-const express = require('express');
 const mysql = require('mysql2');
 
 const PORT = process.env.PORT || 3001;
-const app = express();
-
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
 
 const db = mysql.createConnection(
     {
@@ -45,20 +40,41 @@ const db = mysql.createConnection(
 //         // console.log(result[0].Tables_in_employees_db)
 //     };
 // })
+// const tableNames = db.promise().query('SHOW TABLES')
+//     .then((result)=>result.map((table)=>table.Tables_in_employees_db.charAt(0).toUpperCase()+table.Tables_in_employees_db.slice(1)))
+//     .catch(console.log)
+// console.log(tableNames)
 
-app.get('/api/tables', (req, res)=>{
-    db.query('SHOW TABLES',(err, result)=>{
-        if (err){
-            res.status(400).json(err)
-        }else{
-            res.send(result);
-        }
+// async function testPromise(){db.promise().query('SHOW TABLES') 
+//     .then((result)=>{
+//         // console.log(result)
+//         return result
+//     })}
+// const test2 = await testPromise()
+// console.log(test2)
+
+const sampleTable = "departments"
+const sampleQuery = `SELECT * FROM ${sampleTable}`
+const testInfoSchema = "SELECT `ROW_NAME` FROM `INFORMATION_SCHEMA`.`ROW` WHERE `TABLE_SCHEMA`='employees_db' AND `TABLE_NAME`='"+sampleTable+"'"
+async function testQuery(query){
+    return new Promise((resolve, reject)=>{
+        db.query(query, (err, result)=>{
+            if (err){
+                reject(err);
+            } else{
+                resolve(result);
+            };
+        })
     })
-})
-app.use((req, res) => {
-    res.status(404).end();
-  });
+};
 
-app.listen(PORT, () => {
-console.log(`Server running on port ${PORT}`);
-});
+
+
+
+async function init(){
+    const test = await testQuery(testInfoSchema)
+    console.log(test.map((result)=>result.COLUMN_NAME))
+}
+init()
+
+module.exports = db
